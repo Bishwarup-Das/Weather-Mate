@@ -1,0 +1,10 @@
+.color-box {
+    display: inline-block;
+    width: 15px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+#brand {
+  color: yellow
+}
