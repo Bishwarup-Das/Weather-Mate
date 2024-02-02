@@ -6,6 +6,38 @@ const options = {
     }
 };
 
+async function getCityName() {
+    if ("geolocation" in navigator) {
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+            });
+
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?key=1a6ecf5191b84eacb74270a96c47a8f3&q=${lat}+${lon}&language=en&pretty=1`);
+            const data = await response.json();
+
+            if (data.results && data.results.length > 0) {
+                // Extract the city name
+                const city = data.results[0].components.city || data.results[0].components.town || data.results[0].components.village;
+                return city;
+            } else {
+                // Handle no results
+                throw new Error("Location information not available");
+            }
+        } catch (error) {
+            console.error("Error fetching location:", error);
+            throw new Error("Error fetching location");
+        }
+    } else {
+        // Geolocation not supported
+        throw new Error("Geolocation not supported");
+    }
+}
+
+
 const getWeather = (city)=>{
     fetch('https://weather-by-api-ninjas.p.rapidapi.com/v1/weather?city='+city, options)
         .then(response => response.json())
@@ -59,6 +91,8 @@ const getWeather = (city)=>{
         .catch(err => console.error(err));
 }
 
+
+
 //Search Box
 
 const myButton = document.getElementById("submit");
@@ -73,8 +107,16 @@ myButton.addEventListener("click", function(event) {
     document.getElementById("city").value = ""
 });
 
-getWeather("Jamshedpur")
 
+
+async function main() {
+    try {
+        const city = await getCityName();
+        getWeather(city);
+    } catch (error) {
+        console.error(error.message);
+    }
+}
 
 
 
